@@ -1,8 +1,20 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 400;
-canvas.height = 400;
+// 모바일 및 데스크톱 화면 크기 설정
+function setCanvasSize() {
+    if (window.innerWidth <= 600) { // 모바일 크기 기준
+        canvas.width = 300;
+        canvas.height = 300;
+    } else { // 데스크톱 크기 기준
+        canvas.width = 400;
+        canvas.height = 400;
+    }
+}
+
+// 캔버스 크기를 환경에 맞게 설정
+setCanvasSize();
+window.addEventListener("resize", setCanvasSize); // 화면 크기 변경 시 다시 설정
 
 let snake;
 let direction;
@@ -10,7 +22,7 @@ let food;
 let score;
 
 function startGame() {
-    snake = [{ x: 200, y: 200 }];
+    snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
     direction = { x: 0, y: 0 }; // 초기에는 움직이지 않음
     score = 0;
     document.getElementById("score").innerText = score;
@@ -21,13 +33,12 @@ function startGame() {
 
 function placeFood() {
     food = {
-        x: Math.floor(Math.random() * 20) * 20,
-        y: Math.floor(Math.random() * 20) * 20,
+        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
     };
 }
 
 function updateGame() {
-    // 새로운 머리 위치 계산
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
     // 음식에 도달했을 때
