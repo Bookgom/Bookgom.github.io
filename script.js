@@ -1,6 +1,11 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+let snake;
+let direction;
+let food;
+let score;
+
 // 모바일 및 데스크톱 화면 크기 설정
 function setCanvasSize() {
     if (window.innerWidth <= 600) { // 모바일 크기 기준
@@ -24,7 +29,27 @@ function resetGamePositions() {
 
 // 캔버스 크기를 환경에 맞게 설정
 setCanvasSize();
-window.addEventListener("resize", setCanv과에 도달했을 때
+window.addEventListener("resize", setCanvasSize); // 화면 크기 변경 시 다시 설정
+
+function startGame() {
+    score = 0;
+    document.getElementById("score").innerText = score;
+    document.getElementById("retryButton").style.display = "none";
+    resetGamePositions(); // 게임 시작 시 위치 초기화
+}
+
+function placeFood() {
+    // 음식의 위치를 캔버스 크기에 맞춰 20px 그리드 단위로 설정
+    food = {
+        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
+        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
+    };
+}
+
+function updateGame() {
+    const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+    // 음식에 도달했을 때
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
@@ -103,4 +128,3 @@ document.addEventListener("keydown", (event) => {
 });
 
 startGame();
-
