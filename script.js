@@ -22,7 +22,7 @@ let food;
 let score;
 
 function startGame() {
-    snake = [{ x: canvas.width / 2, y: canvas.height / 2 }];
+    snake = [{ x: Math.floor(canvas.width / 2 / 20) * 20, y: Math.floor(canvas.height / 2 / 20) * 20 }];
     direction = { x: 0, y: 0 }; // 초기에는 움직이지 않음
     score = 0;
     document.getElementById("score").innerText = score;
@@ -32,6 +32,7 @@ function startGame() {
 }
 
 function placeFood() {
+    // 사과의 위치를 캔버스 크기에 맞춰 20px 그리드 단위로 설정
     food = {
         x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
         y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
@@ -41,7 +42,7 @@ function placeFood() {
 function updateGame() {
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-    // 사과(빨간블럭)에 도달했을 때
+    // 음식에 도달했을 때
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
