@@ -8,9 +8,9 @@ let score;
 
 // 모바일 및 데스크톱 화면 크기 설정
 function setCanvasSize() {
-    if (window.innerWidth <= 500) { // 모바일 크기 기준
-        canvas.width = 250;
-        canvas.height = 250;
+    if (window.innerWidth <= 400) { // 모바일 크기 기준
+        canvas.width = 200;
+        canvas.height = 200;
     } else { // 데스크톱 크기 기준
         canvas.width = 400;
         canvas.height = 400;
