@@ -1,7 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// 캔버스 크기를 명시적으로 설정
 canvas.width = 400;
 canvas.height = 400;
 
@@ -9,29 +8,15 @@ let snake;
 let direction;
 let food;
 let score;
-let gameLoop;
-let hasMoved = false; // 방향키가 눌렸을 때만 이동하도록 제어
 
 function startGame() {
-    // 초기화
     snake = [{ x: 200, y: 200 }];
     direction = { x: 0, y: 0 }; // 초기에는 움직이지 않음
     score = 0;
-    hasMoved = false;
     document.getElementById("score").innerText = score;
     document.getElementById("retryButton").style.display = "none";
     placeFood();
-
-    // 기존의 게임 루프가 있으면 종료
-    if (gameLoop) clearInterval(gameLoop);
-
-    // 100ms마다 updateGame을 호출하지만, hasMoved가 true일 때만 게임 업데이트
-    gameLoop = setInterval(() => {
-        if (hasMoved) {
-            updateGame();
-            hasMoved = false; // 이동 후에는 다시 false로 설정
-        }
-    }, 100);
+    draw(); // 초기 화면을 그림
 }
 
 function placeFood() {
@@ -42,9 +27,10 @@ function placeFood() {
 }
 
 function updateGame() {
+    // 새로운 머리 위치 계산
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-    // 뱀이 음식에 도달했을 때
+    // 음식에 도달했을 때
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
@@ -72,9 +58,8 @@ function collision(head) {
 }
 
 function gameOver() {
-    clearInterval(gameLoop);
-    document.getElementById("retryButton").style.display = "block";
     alert("Game Over! Score: " + score);
+    startGame(); // 게임 초기화
 }
 
 function draw() {
@@ -102,7 +87,7 @@ function changeDirection(newDirection) {
             if (direction.x === 0) direction = { x: 20, y: 0 };
             break;
     }
-    hasMoved = true; // 방향 변경이 있을 때만 이동
+    updateGame(); // 방향을 바꿀 때마다 한 번씩 이동
 }
 
 // 키보드 방향키 이벤트 처리
@@ -112,4 +97,15 @@ document.addEventListener("keydown", (event) => {
             changeDirection("up");
             break;
         case "ArrowDown":
-      
+            changeDirection("down");
+            break;
+        case "ArrowLeft":
+            changeDirection("left");
+            break;
+        case "ArrowRight":
+            changeDirection("right");
+            break;
+    }
+});
+
+startGame();
