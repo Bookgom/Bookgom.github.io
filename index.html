@@ -13,6 +13,17 @@
         <div id="scoreBoard">Score: <span id="score">0</span></div>
     </div>
     <button id="retryButton" onclick="startGame()">Retry</button>
+    
+    <!-- 모바일 방향 제어 버튼 -->
+    <div id="controls">
+        <button onclick="changeDirection('up')">▲</button>
+        <button onclick="changeDirection('left')">◀</button>
+        <button onclick="changeDirection('down')">▼</button>
+        <button onclick="changeDirection('right')">▶</button>
+    </div>
+
     <script src="script.js"></script>
+    <script src="motionSensor.js"></script>
 </body>
 </html>
+
