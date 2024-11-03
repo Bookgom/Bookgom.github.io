@@ -1,1 +1,0 @@
-# Bookgom.github.io
