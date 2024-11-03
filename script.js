@@ -41,7 +41,7 @@ function placeFood() {
 function updateGame() {
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-    // 음식에 도달했을 때
+    // 사과(빨간블럭)에 도달했을 때
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
