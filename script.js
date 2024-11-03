@@ -10,39 +10,21 @@ function setCanvasSize() {
         canvas.width = 400;
         canvas.height = 400;
     }
+    // 캔버스 크기가 변경되면 스네이크와 음식의 위치도 재설정
+    resetGamePositions();
+}
+
+// 스네이크와 음식의 위치를 초기화하는 함수
+function resetGamePositions() {
+    snake = [{ x: Math.floor(canvas.width / 2 / 20) * 20, y: Math.floor(canvas.height / 2 / 20) * 20 }];
+    direction = { x: 0, y: 0 };
+    placeFood();
+    draw();
 }
 
 // 캔버스 크기를 환경에 맞게 설정
 setCanvasSize();
-window.addEventListener("resize", setCanvasSize); // 화면 크기 변경 시 다시 설정
-
-let snake;
-let direction;
-let food;
-let score;
-
-function startGame() {
-    snake = [{ x: Math.floor(canvas.width / 2 / 20) * 20, y: Math.floor(canvas.height / 2 / 20) * 20 }];
-    direction = { x: 0, y: 0 }; // 초기에는 움직이지 않음
-    score = 0;
-    document.getElementById("score").innerText = score;
-    document.getElementById("retryButton").style.display = "none";
-    placeFood();
-    draw(); // 초기 화면을 그림
-}
-
-function placeFood() {
-    // 사과의 위치를 캔버스 크기에 맞춰 20px 그리드 단위로 설정
-    food = {
-        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
-        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
-    };
-}
-
-function updateGame() {
-    const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-    // 음식에 도달했을 때
+window.addEventListener("resize", setCanv과에 도달했을 때
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
@@ -121,3 +103,4 @@ document.addEventListener("keydown", (event) => {
 });
 
 startGame();
+
