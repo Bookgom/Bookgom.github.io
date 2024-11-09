@@ -6,12 +6,66 @@ let direction;
 let food;
 let score;
 
-// 캔버스 크기 설정을 위해 CSS에서 조정하도록 설정했으므로 JavaScript에서는 캔버스의 크기를 설정하지 않음
+const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app"; // 외부에서 접근 가능한 서버 URL
+
+// 모션 센서 데이터 수집 배열
+let motionData = [];
+
+// DeviceMotionEvent로 가속도 및 각속도 데이터 수집
+function handleMotionEvent(event) {
+    const { acceleration, rotationRate } = event;
+    const data = {
+        timestamp: Date.now(),
+        acceleration: {
+            x: acceleration.x || 0,
+            y: acceleration.y || 0,
+            z: acceleration.z || 0
+        },
+        rotationRate: {
+            alpha: rotationRate.alpha || 0,
+            beta: rotationRate.beta || 0,
+            gamma: rotationRate.gamma || 0
+        }
+    };
+    motionData.push(data);
+    if (motionData.length > 50) motionData.shift(); // 데이터 개수 제한
+}
+
+// 서버로 모션 센서 데이터 전송
+function sendMotionData() {
+    if (motionData.length > 0) {
+        fetch(SERVER_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ motionData })
+        })
+        .then(response => response.json())
+        .then(data => console.log("Data sent to server:", data))
+        .catch(error => console.error("Error sending data:", error));
+
+        motionData = []; // 전송 후 배열 초기화
+    }
+}
+
+// 주기적으로 모션 데이터를 서버에 전송
+setInterval(sendMotionData, 5000);
+
+function startMotionCapture() {
+    if (window.DeviceMotionEvent) {
+        window.addEventListener("devicemotion", handleMotionEvent);
+    } else {
+        console.warn("DeviceMotionEvent is not supported on this device.");
+    }
+}
+
+// 스네이크 게임 초기화 및 설정 함수
 function setCanvasSize() {
-    if (window.innerWidth <= 600) { // 모바일 크기 기준
+    if (window.innerWidth <= 600) {
         canvas.width = 300;
         canvas.height = 300;
-    } else { // 데스크톱 크기 기준
+    } else {
         canvas.width = 400;
         canvas.height = 400;
     }
@@ -25,7 +79,7 @@ function resetGamePositions() {
     draw();
 }
 
-window.addEventListener("resize", setCanvasSize); // 화면 크기 변경 시 다시 설정
+window.addEventListener("resize", setCanvasSize);
 
 function startGame() {
     score = 0;
@@ -54,11 +108,7 @@ function updateGame() {
         snake.unshift(head);
     }
 
-    if (
-        head.x < 0 || head.x >= canvas.width ||
-        head.y < 0 || head.y >= canvas.height ||
-        collision(head)
-    ) {
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || collision(head)) {
         gameOver();
     }
 
@@ -101,6 +151,7 @@ function changeDirection(newDirection) {
     updateGame();
 }
 
+// 키보드 방향키 이벤트 처리
 document.addEventListener("keydown", (event) => {
     switch (event.key) {
         case "ArrowUp":
@@ -118,4 +169,6 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
+// 게임 및 모션 데이터 수집 시작
 startGame();
+startMotionCapture();
