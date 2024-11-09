@@ -6,12 +6,12 @@ let direction;
 let food;
 let score;
 
-const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app"; // 외부에서 접근 가능한 서버 URL
+const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 외부에서 접근 가능한 서버 URL
 
 // 모션 센서 데이터 수집 배열
 let motionData = [];
 
-// DeviceMotionEvent로 가속도 및 각속도 데이터 수집
+// DeviceMotionEvent로 가속도 및 회전 속도 데이터 수집
 function handleMotionEvent(event) {
     const { acceleration, rotationRate } = event;
     const data = {
@@ -60,7 +60,7 @@ function startMotionCapture() {
     }
 }
 
-// 스네이크 게임 초기화 및 설정 함수
+// 게임 초기화 및 설정 함수
 function setCanvasSize() {
     if (window.innerWidth <= 600) {
         canvas.width = 300;
@@ -151,7 +151,6 @@ function changeDirection(newDirection) {
     updateGame();
 }
 
-// 키보드 방향키 이벤트 처리
 document.addEventListener("keydown", (event) => {
     switch (event.key) {
         case "ArrowUp":
@@ -169,6 +168,5 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// 게임 및 모션 데이터 수집 시작
 startGame();
 startMotionCapture();
