@@ -50,7 +50,7 @@ function sendMotionData() {
 }
 
 // 주기적으로 모션 데이터를 서버에 전송
-setInterval(sendMotionData, 1000);
+setInterval(sendMotionData, 5000);
 
 function startMotionCapture() {
     if (window.DeviceMotionEvent) {
