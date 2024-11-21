@@ -6,49 +6,43 @@ let direction;
 let food;
 let score;
 
-const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 서버 URL
+const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data";
 let motionData = [];
-
-// 권한 요청 버튼
-const requestPermissionButton = document.getElementById("requestPermissionButton");
 
 // iOS 권한 요청 설정
 function checkAndRequestPermission() {
+    const requestPermissionButton = document.getElementById("requestPermissionButton");
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        // iOS 환경: 버튼 표시
         requestPermissionButton.style.display = 'block';
         requestPermissionButton.addEventListener('click', () => {
             DeviceMotionEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState === 'granted') {
                         console.log('Motion permission granted');
-                        startMotionCapture(); // 권한 허가 후 모션 데이터 수집 시작
-                        requestPermissionButton.style.display = 'none'; // 버튼 숨기기
+                        startMotionCapture();
+                        requestPermissionButton.style.display = 'none';
                     } else {
-                        console.error('Permission denied');
                         alert('모션 데이터를 사용하려면 권한을 허용해주세요.');
                     }
                 })
                 .catch(error => console.error('Permission request failed:', error));
         });
     } else {
-        // Android/데스크톱: 자동 실행
         startMotionCapture();
     }
 }
 
-// 모션 데이터 수집 시작 함수
+// 모션 데이터 수집 시작
 function startMotionCapture() {
     if (window.DeviceMotionEvent) {
-        console.log("Starting motion capture...");
         window.addEventListener("devicemotion", handleMotionEvent);
-        setInterval(sendMotionData, 5000); // 5초 간격으로 데이터 전송
+        setInterval(sendMotionData, 5000);
     } else {
-        console.warn("DeviceMotionEvent is not supported on this device.");
+        console.warn("DeviceMotionEvent is not supported.");
     }
 }
 
-// 모션 데이터 수집 함수
+// 모션 데이터 처리
 function handleMotionEvent(event) {
     const { acceleration, rotationRate } = event;
     const data = {
@@ -65,10 +59,10 @@ function handleMotionEvent(event) {
         }
     };
     motionData.push(data);
-    if (motionData.length > 50) motionData.shift(); // 데이터 개수 제한
+    if (motionData.length > 50) motionData.shift();
 }
 
-// 서버로 모션 센서 데이터 전송
+// 모션 데이터 서버 전송
 function sendMotionData() {
     if (motionData.length > 0) {
         fetch(SERVER_URL, {
@@ -79,40 +73,56 @@ function sendMotionData() {
             body: JSON.stringify({ motionData })
         })
         .then(response => response.json())
-        .then(data => console.log("Data sent to server:", data))
-        .catch(error => console.error("Error sending data:", error));
+        .catch(error => console.error('Error sending data:', error));
 
-        motionData = []; // 전송 후 배열 초기화
+        motionData = [];
     }
 }
 
-// 게임 초기화 및 리셋
-function resetGamePositions() {
-    snake = [{ x: Math.floor(canvas.width / 2 / 20) * 20, y: Math.floor(canvas.height / 2 / 20) * 20 }];
-    direction = { x: 0, y: 0 };
-    placeFood();
-    draw();
-}
-
-window.addEventListener("resize", setCanvasSize);
-
+// 게임 초기화
 function startGame() {
     score = 0;
     document.getElementById("score").innerText = score;
     document.getElementById("retryButton").style.display = 'none';
     resetGamePositions();
-
-    // 권한 요청 및 모션 데이터 수집 시작
     checkAndRequestPermission();
 }
 
+// 캔버스 설정
+function resetGamePositions() {
+    snake = [{ x: 200, y: 200 }];
+    direction = { x: 0, y: 0 };
+    placeFood();
+    draw();
+}
+
+// 방향 변경 (키보드 및 버튼)
+function changeDirection(newDirection) {
+    switch (newDirection) {
+        case 'up':
+            if (direction.y === 0) direction = { x: 0, y: -20 };
+            break;
+        case 'down':
+            if (direction.y === 0) direction = { x: 0, y: 20 };
+            break;
+        case 'left':
+            if (direction.x === 0) direction = { x: -20, y: 0 };
+            break;
+        case 'right':
+            if (direction.x === 0) direction = { x: 20, y: 0 };
+            break;
+    }
+}
+
+// 음식 배치
 function placeFood() {
     food = {
-        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
-        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
+        x: Math.floor(Math.random() * canvas.width / 20) * 20,
+        y: Math.floor(Math.random() * canvas.height / 20) * 20
     };
 }
 
+// 게임 상태 업데이트
 function updateGame() {
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
@@ -127,61 +137,40 @@ function updateGame() {
     }
 
     if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || collision(head)) {
-        gameOver();
+        alert(`Game Over! Your score: ${score}`);
+        startGame();
     }
-
     draw();
 }
 
+// 충돌 감지
 function collision(head) {
     return snake.some((segment, index) => index !== 0 && segment.x === head.x && segment.y === head.y);
 }
 
-function gameOver() {
-    alert("Game Over! Score: " + score);
-    startGame();
-}
-
+// 캔버스 그리기
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "green";
+    ctx.fillStyle = 'green';
     snake.forEach(segment => ctx.fillRect(segment.x, segment.y, 20, 20));
-
-    ctx.fillStyle = "red";
+    ctx.fillStyle = 'red';
     ctx.fillRect(food.x, food.y, 20, 20);
 }
 
-function changeDirection(newDirection) {
-    switch (newDirection) {
-        case "up":
-            if (direction.y === 0) direction = { x: 0, y: -20 };
-            break;
-        case "down":
-            if (direction.y === 0) direction = { x: 0, y: 20 };
-            break;
-        case "left":
-            if (direction.x === 0) direction = { x: -20, y: 0 };
-            break;
-        case "right":
-            if (direction.x === 0) direction = { x: 20, y: 0 };
-            break;
-    }
-    updateGame();
-}
-
+// 키보드 이벤트
 document.addEventListener("keydown", (event) => {
     switch (event.key) {
         case "ArrowUp":
-            changeDirection("up");
+            changeDirection('up');
             break;
         case "ArrowDown":
-            changeDirection("down");
+            changeDirection('down');
             break;
         case "ArrowLeft":
-            changeDirection("left");
+            changeDirection('left');
             break;
         case "ArrowRight":
-            changeDirection("right");
+            changeDirection('right');
             break;
     }
 });
