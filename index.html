@@ -25,6 +25,21 @@
             font-size: 16px;
             border-radius: 5px;
         }
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .controls button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 20px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -34,7 +49,18 @@
     <p style="text-align: center;">Score: <span id="score">0</span></p>
     <button id="retryButton" onclick="startGame()" style="display: block; margin: 10px auto;">Retry</button>
 
+    <!-- 컨트롤 버튼 -->
+    <div class="controls">
+        <button onclick="changeDirection('up')">↑</button>
+    </div>
+    <div class="controls">
+        <button onclick="changeDirection('left')">←</button>
+        <button onclick="changeDirection('right')">→</button>
+    </div>
+    <div class="controls">
+        <button onclick="changeDirection('down')">↓</button>
+    </div>
+
     <script src="script.js?v=3"></script>
 </body>
 </html>
-
