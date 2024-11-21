@@ -1,27 +1,39 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Snake Game with Motion Data</title>
+    <style>
+        #gameCanvas {
+            border: 1px solid black;
+            display: block;
+            margin: auto;
+        }
+        #retryButton {
+            display: none;
+            margin-top: 10px;
+        }
+        #requestPermissionButton {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Snake Game</h1>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        <div id="scoreBoard">Score: <span id="score">0</span></div>
-        <button id="retryButton" onclick="startGame()">Retry</button>
-    </div>
-    
-    <!-- 모바일 방향 제어 버튼 -->
-    <div id="controls">
-        <button onclick="changeDirection('up')">▲</button>
-        <button onclick="changeDirection('left')">◀</button>
-        <button onclick="changeDirection('down')">▼</button>
-        <button onclick="changeDirection('right')">▶</button>
-    </div>
+    <h1 style="text-align: center;">Snake Game</h1>
+    <button id="requestPermissionButton">모션 데이터 사용 권한 요청</button>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <p style="text-align: center;">Score: <span id="score">0</span></p>
+    <button id="retryButton" onclick="startGame()" style="display: block; margin: 10px auto;">Retry</button>
 
-    <<script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>
