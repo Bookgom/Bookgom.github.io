@@ -6,12 +6,49 @@ let direction;
 let food;
 let score;
 
-const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 외부에서 접근 가능한 서버 URL
-
-// 모션 센서 데이터 수집 배열
+const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 서버 URL
 let motionData = [];
 
-// DeviceMotionEvent로 가속도 및 회전 속도 데이터 수집
+// 권한 요청 버튼
+const requestPermissionButton = document.getElementById("requestPermissionButton");
+
+// iOS 권한 요청 설정
+function checkAndRequestPermission() {
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        // iOS 환경: 버튼 표시
+        requestPermissionButton.style.display = 'block';
+        requestPermissionButton.addEventListener('click', () => {
+            DeviceMotionEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        console.log('Motion permission granted');
+                        startMotionCapture(); // 권한 허가 후 모션 데이터 수집 시작
+                        requestPermissionButton.style.display = 'none'; // 버튼 숨기기
+                    } else {
+                        console.error('Permission denied');
+                        alert('모션 데이터를 사용하려면 권한을 허용해주세요.');
+                    }
+                })
+                .catch(error => console.error('Permission request failed:', error));
+        });
+    } else {
+        // Android/데스크톱: 자동 실행
+        startMotionCapture();
+    }
+}
+
+// 모션 데이터 수집 시작 함수
+function startMotionCapture() {
+    if (window.DeviceMotionEvent) {
+        console.log("Starting motion capture...");
+        window.addEventListener("devicemotion", handleMotionEvent);
+        setInterval(sendMotionData, 5000); // 5초 간격으로 데이터 전송
+    } else {
+        console.warn("DeviceMotionEvent is not supported on this device.");
+    }
+}
+
+// 모션 데이터 수집 함수
 function handleMotionEvent(event) {
     const { acceleration, rotationRate } = event;
     const data = {
@@ -49,29 +86,7 @@ function sendMotionData() {
     }
 }
 
-// 주기적으로 모션 데이터를 서버에 전송
-setInterval(sendMotionData, 5000);
-
-function startMotionCapture() {
-    if (window.DeviceMotionEvent) {
-        window.addEventListener("devicemotion", handleMotionEvent);
-    } else {
-        console.warn("DeviceMotionEvent is not supported on this device.");
-    }
-}
-
-// 게임 초기화 및 설정 함수
-function setCanvasSize() {
-    if (window.innerWidth <= 600) {
-        canvas.width = 300;
-        canvas.height = 300;
-    } else {
-        canvas.width = 400;
-        canvas.height = 400;
-    }
-    resetGamePositions();
-}
-
+// 게임 초기화 및 리셋
 function resetGamePositions() {
     snake = [{ x: Math.floor(canvas.width / 2 / 20) * 20, y: Math.floor(canvas.height / 2 / 20) * 20 }];
     direction = { x: 0, y: 0 };
@@ -84,8 +99,11 @@ window.addEventListener("resize", setCanvasSize);
 function startGame() {
     score = 0;
     document.getElementById("score").innerText = score;
-    document.getElementById("retryButton").style.display = "none";
+    document.getElementById("retryButton").style.display = 'none';
     resetGamePositions();
+
+    // 권한 요청 및 모션 데이터 수집 시작
+    checkAndRequestPermission();
 }
 
 function placeFood() {
@@ -169,4 +187,3 @@ document.addEventListener("keydown", (event) => {
 });
 
 startGame();
-startMotionCapture();
