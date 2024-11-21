@@ -5,6 +5,7 @@ let snake;
 let direction;
 let food;
 let score;
+let gameInterval; // 게임 업데이트 인터벌
 
 const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data";
 let motionData = [];
@@ -18,7 +19,6 @@ function checkAndRequestPermission() {
             DeviceMotionEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState === 'granted') {
-                        console.log('Motion permission granted');
                         startMotionCapture();
                         requestPermissionButton.style.display = 'none';
                     } else {
@@ -81,11 +81,13 @@ function sendMotionData() {
 
 // 게임 초기화
 function startGame() {
+    clearInterval(gameInterval); // 기존 게임 인터벌 제거
     score = 0;
     document.getElementById("score").innerText = score;
     document.getElementById("retryButton").style.display = 'none';
     resetGamePositions();
     checkAndRequestPermission();
+    gameInterval = setInterval(updateGame, 100); // 100ms마다 게임 업데이트
 }
 
 // 캔버스 설정
@@ -112,6 +114,7 @@ function changeDirection(newDirection) {
             if (direction.x === 0) direction = { x: 20, y: 0 };
             break;
     }
+    updateGame(); // 즉시 게임 업데이트
 }
 
 // 음식 배치
@@ -176,3 +179,4 @@ document.addEventListener("keydown", (event) => {
 });
 
 startGame();
+
