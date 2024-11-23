@@ -7,31 +7,40 @@ let food;
 let score;
 let motionData = [];
 
-// Web Audio API를 활용한 440Hz Sine Wave 재생 함수
-function playSineWave() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+// Web Audio API 변수
+let audioContext = null;
+let oscillator = null;
 
-    // 사인파 설정
-    oscillator.type = "sine";
-    oscillator.frequency.value = 440; // 440Hz (A4 음)
-
-    // 사운드 크기 설정
-    gainNode.gain.value = 0.1; // 볼륨 (0 ~ 1)
-
-    // 연결
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    // 재생 시작
-    oscillator.start();
-
-    // 2초 후 사운드 중지
-    setTimeout(() => {
+// Sine Wave 토글 재생/중지 함수
+function toggleSineWave() {
+    if (audioContext && oscillator) {
+        // 사운드가 이미 재생 중이라면 중지
         oscillator.stop();
         audioContext.close();
-    }, 2000);
+        audioContext = null;
+        oscillator = null;
+        console.log("Sine wave stopped");
+    } else {
+        // 사운드 시작
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        // 사인파 설정
+        oscillator.type = "sine";
+        oscillator.frequency.value = 440; // 440Hz (A4 음)
+
+        // 사운드 크기 설정
+        gainNode.gain.value = 0.1; // 볼륨 (0 ~ 1)
+
+        // 연결
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // 재생 시작
+        oscillator.start();
+        console.log("Sine wave playing at 440Hz");
+    }
 }
 
 // Snake 게임 초기화 함수
