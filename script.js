@@ -5,89 +5,43 @@ let snake;
 let direction;
 let food;
 let score;
-
-const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data";
 let motionData = [];
 
-// iOS 권한 요청 설정
-function checkAndRequestPermission() {
-    const requestPermissionButton = document.getElementById("requestPermissionButton");
-    if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        requestPermissionButton.style.display = 'block';
-        requestPermissionButton.addEventListener('click', () => {
-            DeviceMotionEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        startMotionCapture();
-                        requestPermissionButton.style.display = 'none';
-                    } else {
-                        alert('모션 데이터를 사용하려면 권한을 허용해주세요.');
-                    }
-                })
-                .catch(error => console.error('Permission request failed:', error));
-        });
-    } else {
-        startMotionCapture();
-    }
+// Web Audio API를 활용한 Sine Wave 재생 함수
+function playSineWave() {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    // 사인파 설정
+    oscillator.type = "sine";
+    oscillator.frequency.value = 20000; // 20kHz
+
+    // 사운드 크기 설정
+    gainNode.gain.value = 0.1; // 볼륨 (0~1 사이의 값)
+
+    // 연결
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // 재생 시작
+    oscillator.start();
+
+    // 2초 후 사운드 중지
+    setTimeout(() => {
+        oscillator.stop();
+        audioContext.close();
+    }, 2000);
 }
 
-// 모션 데이터 수집 시작
-function startMotionCapture() {
-    if (window.DeviceMotionEvent) {
-        window.addEventListener("devicemotion", handleMotionEvent);
-        setInterval(sendMotionData, 5000);
-    } else {
-        console.warn("DeviceMotionEvent is not supported.");
-    }
-}
-
-// 모션 데이터 처리
-function handleMotionEvent(event) {
-    const { acceleration, rotationRate } = event;
-    const data = {
-        timestamp: Date.now(),
-        acceleration: {
-            x: acceleration.x || 0,
-            y: acceleration.y || 0,
-            z: acceleration.z || 0
-        },
-        rotationRate: {
-            alpha: rotationRate.alpha || 0,
-            beta: rotationRate.beta || 0,
-            gamma: rotationRate.gamma || 0
-        }
-    };
-    motionData.push(data);
-    if (motionData.length > 50) motionData.shift();
-}
-
-// 모션 데이터 서버 전송
-function sendMotionData() {
-    if (motionData.length > 0) {
-        fetch(SERVER_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ motionData })
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Error sending data:', error));
-
-        motionData = [];
-    }
-}
-
-// 게임 초기화
+// Snake 게임 초기화 함수
 function startGame() {
     score = 0;
     document.getElementById("score").innerText = score;
     document.getElementById("retryButton").style.display = 'none';
     resetGamePositions();
-    checkAndRequestPermission();
 }
 
-// 캔버스 초기화
 function resetGamePositions() {
     snake = [{ x: 200, y: 200 }];
     direction = { x: 0, y: 0 };
@@ -111,15 +65,7 @@ function changeDirection(newDirection) {
             if (direction.x === 0) direction = { x: 20, y: 0 };
             break;
     }
-    updateGame(); // 클릭하면 바로 업데이트
-}
-
-// 음식 배치
-function placeFood() {
-    food = {
-        x: Math.floor(Math.random() * canvas.width / 20) * 20,
-        y: Math.floor(Math.random() * canvas.height / 20) * 20
-    };
+    updateGame(); // 즉시 게임 업데이트
 }
 
 // 게임 상태 업데이트
@@ -141,6 +87,14 @@ function updateGame() {
         startGame();
     }
     draw();
+}
+
+// 음식 배치
+function placeFood() {
+    food = {
+        x: Math.floor(Math.random() * canvas.width / 20) * 20,
+        y: Math.floor(Math.random() * canvas.height / 20) * 20
+    };
 }
 
 // 충돌 감지
