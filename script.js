@@ -8,45 +8,56 @@ let score;
 let motionData = [];
 
 // Flask 서버 URL
-const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 외부 접속 가능한 서버 URL
+const SERVER_URL = "https://magpie-correct-goshawk.ngrok-free.app/api/motion-data"; // 외부 접근 가능한 서버 URL
 
 // Web Audio API 변수
 let audioContext = null;
 let oscillator = null;
 
-// Sine Wave 토글 재생/중지 함수
+// Sine Wave 토글 함수
 function toggleSineWave() {
     if (audioContext && oscillator) {
-        // 사운드가 이미 재생 중이라면 중지
         oscillator.stop();
         audioContext.close();
         audioContext = null;
         oscillator = null;
         console.log("Sine wave stopped");
     } else {
-        // 사운드 시작
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
 
-        // 사인파 설정
         oscillator.type = "sine";
-        oscillator.frequency.value = 440; // 440Hz (A4 음)
+        oscillator.frequency.value = 440; // 440Hz
 
-        // 사운드 크기 설정
-        gainNode.gain.value = 0.1; // 볼륨 (0 ~ 1)
-
-        // 연결
+        gainNode.gain.value = 0.1; // 볼륨 설정
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
 
-        // 재생 시작
         oscillator.start();
         console.log("Sine wave playing at 440Hz");
     }
 }
 
-// 모션 센서 데이터 수집
+// iOS 권한 요청
+function requestPermissionForIOS() {
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+        DeviceMotionEvent.requestPermission()
+            .then((permissionState) => {
+                if (permissionState === "granted") {
+                    console.log("iOS permission granted");
+                    startMotionCapture();
+                } else {
+                    alert("Motion data permission is required!");
+                }
+            })
+            .catch((error) => console.error("Permission request failed:", error));
+    } else {
+        startMotionCapture();
+    }
+}
+
+// 모션 데이터 수집
 function handleMotionEvent(event) {
     const { acceleration, rotationRate } = event;
     const data = {
@@ -63,7 +74,7 @@ function handleMotionEvent(event) {
         },
     };
     motionData.push(data);
-    if (motionData.length > 50) motionData.shift(); // 데이터 개수 제한
+    if (motionData.length > 50) motionData.shift();
 }
 
 // 서버로 모션 데이터 전송
@@ -80,27 +91,7 @@ function sendMotionData() {
             .then((data) => console.log("Data sent to server:", data))
             .catch((error) => console.error("Error sending data:", error));
 
-        motionData = []; // 전송 후 데이터 초기화
-    }
-}
-
-// iOS 권한 요청 버튼
-function requestPermissionForIOS() {
-    if (typeof DeviceMotionEvent.requestPermission === "function") {
-        DeviceMotionEvent.requestPermission()
-            .then((permissionState) => {
-                if (permissionState === "granted") {
-                    console.log("iOS permission granted");
-                    startMotionCapture();
-                } else {
-                    console.error("Permission denied");
-                    alert("모션 데이터를 사용하려면 권한을 허용해주세요.");
-                }
-            })
-            .catch((error) => console.error("Permission request failed:", error));
-    } else {
-        console.log("Permission request not required on this device.");
-        startMotionCapture();
+        motionData = [];
     }
 }
 
@@ -109,11 +100,11 @@ function startMotionCapture() {
     if (window.DeviceMotionEvent) {
         window.addEventListener("devicemotion", handleMotionEvent);
     } else {
-        console.warn("DeviceMotionEvent is not supported on this device.");
+        console.warn("DeviceMotionEvent not supported");
     }
 }
 
-// Snake 게임 초기화 함수
+// 게임 초기화
 function startGame() {
     score = 0;
     document.getElementById("score").innerText = score;
@@ -144,13 +135,11 @@ function changeDirection(newDirection) {
             if (direction.x === 0) direction = { x: 20, y: 0 };
             break;
     }
-    updateGame(); // 즉시 게임 업데이트
+    updateGame();
 }
 
-// 게임 상태 업데이트
 function updateGame() {
     const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
     if (head.x === food.x && head.y === food.y) {
         snake.unshift(head);
         score++;
@@ -168,28 +157,23 @@ function updateGame() {
         head.y >= canvas.height ||
         collision(head)
     ) {
-        alert(`Game Over! Your score: ${score}`);
+        alert("Game Over! Your score: " + score);
         startGame();
     }
     draw();
 }
 
-// 음식 배치
 function placeFood() {
     food = {
-        x: Math.floor(Math.random() * (canvas.width / 20)) * 20,
-        y: Math.floor(Math.random() * (canvas.height / 20)) * 20,
+        x: Math.floor(Math.random() * canvas.width / 20) * 20,
+        y: Math.floor(Math.random() * canvas.height / 20) * 20,
     };
 }
 
-// 충돌 감지
 function collision(head) {
-    return snake.some(
-        (segment, index) => index !== 0 && segment.x === head.x && segment.y === head.y
-    );
+    return snake.some((segment, index) => index !== 0 && segment.x === head.x && segment.y === head.y);
 }
 
-// 캔버스 그리기
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "green";
@@ -216,8 +200,9 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// 모션 데이터 전송 주기 설정
+// 주기적으로 모션 데이터 전송
 setInterval(sendMotionData, 5000);
 
 // 게임 시작
 startGame();
+
