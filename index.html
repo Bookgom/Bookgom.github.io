@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game with Motion Data</title>
+    <title>Snake Game with Sine Wave</title>
     <style>
         #gameCanvas {
             border: 1px solid black;
@@ -15,7 +15,7 @@
             margin-top: 10px;
         }
         #requestPermissionButton {
-            display: none; /* 기본적으로 숨김 */
+            display: none;
             margin: 10px auto;
             padding: 10px 20px;
             background-color: #007BFF;
@@ -40,10 +40,21 @@
             border: none;
             cursor: pointer;
         }
+        #sineWaveButton {
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            background-color: #28A745;
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Snake Game</h1>
+    <h1 style="text-align: center;">Snake Game with Sine Wave</h1>
     <button id="requestPermissionButton">모션 데이터 사용 권한 요청</button>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <p style="text-align: center;">Score: <span id="score">0</span></p>
@@ -51,16 +62,19 @@
 
     <!-- 컨트롤 버튼 -->
     <div class="controls">
-        <button id="btn-up" onclick="changeDirection('up')">↑</button>
+        <button onclick="changeDirection('up')">↑</button>
     </div>
     <div class="controls">
-        <button id="btn-left" onclick="changeDirection('left')">←</button>
-        <button id="btn-right" onclick="changeDirection('right')">→</button>
+        <button onclick="changeDirection('left')">←</button>
+        <button onclick="changeDirection('right')">→</button>
     </div>
     <div class="controls">
-        <button id="btn-down" onclick="changeDirection('down')">↓</button>
+        <button onclick="changeDirection('down')">↓</button>
     </div>
 
-    <script src="script.js?v=5"></script>
+    <!-- Sine Wave 버튼 -->
+    <button id="sineWaveButton" onclick="playSineWave()">Play 20kHz Sine Wave</button>
+
+    <script src="script.js?v=6"></script>
 </body>
 </html>
