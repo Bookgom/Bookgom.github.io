@@ -7,7 +7,7 @@ let food;
 let score;
 let motionData = [];
 
-// Web Audio API를 활용한 Sine Wave 재생 함수
+// Web Audio API를 활용한 440Hz Sine Wave 재생 함수
 function playSineWave() {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
@@ -15,10 +15,10 @@ function playSineWave() {
 
     // 사인파 설정
     oscillator.type = "sine";
-    oscillator.frequency.value = 20000; // 20kHz
+    oscillator.frequency.value = 440; // 440Hz (A4 음)
 
     // 사운드 크기 설정
-    gainNode.gain.value = 0.1; // 볼륨 (0~1 사이의 값)
+    gainNode.gain.value = 0.1; // 볼륨 (0 ~ 1)
 
     // 연결
     oscillator.connect(gainNode);
